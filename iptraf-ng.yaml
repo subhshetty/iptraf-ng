@@ -1,0 +1,25 @@
+- hosts: cloud
+  become: yes
+  tasks:
+  - name: Check whether the package is installed or not
+    apt: name=$item state=latest
+    with_items:
+      - iptraf-ng
+    when: ansible_distribution == 'Debian'
+  - name: package
+    yum: name=$item state=latest
+    with_items:
+      - iptraf-ng
+    when: ansible_distribution == 'Centos'
+  - name: Execute iptraf-ng
+    shell: true > /var/log/iptraf-ng/list && iptraf-ng -l all -t 1 -B -L list && sleep 65 && awk '/Ethernet/ { print > "/var/log/iptraf-ng/debug.txt" } /Average/ { print > "/var/log/iptraf-ng/debug.txt" }' /var/log/iptraf-ng/list && cat /var/log/iptraf-ng/debug.txt
+    register: result
+    ignore_errors: yes
+    args:
+     executable: /bin/bash
+  - name: clear the list file
+    local_action: shell true > /root/list
+  - name: Show output
+    debug: msg="{{ result.stdout_lines }}"
+  - name: append output
+    local_action: lineinfile line="{{ result.stdout_lines }}" path=/root/list

@@ -1,0 +1,1 @@
+true > /var/log/iptraf-ng/list && iptraf-ng -l all -t 1 -B -L list && sleep 65 && awk '/Ethernet/ { print > "/var/log/iptraf-ng/debug.txt" } /Average/ { print > "/var/log/iptraf-ng/debug.txt" }' /var/log/iptraf-ng/list && cat /var/log/iptraf-ng/debug.txt
